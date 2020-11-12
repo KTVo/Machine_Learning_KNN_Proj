@@ -94,6 +94,7 @@ if __name__ == '__main__':
             finalResult.append({'info': K_lowest_distances[i:i+K], 'predicted_diagnosis': None});
             i = i + K + 1
 
+    print("4646581 - ", finalResult[0].get('info')[0].get('predicted_diagnosis'))
 
     print(finalResult[0].get('info')[2].get('actual_diagnosis_from_training') );
     for i in range(0, len(finalResult)):
@@ -104,35 +105,36 @@ if __name__ == '__main__':
             print(finalResult[i].get('info')[k]);
             if finalResult[i].get('info')[k].get('actual_diagnosis_from_training') == 'M':
                 num_malignant = num_malignant + 1;
-            elif finalResult[i].get('info')[k].get('actual_diagnosis_from_training')== 'B':
+            elif finalResult[i].get('info')[k].get('actual_diagnosis_from_training') == 'B':
                 num_benign = num_benign + 1;
 
         print("num_malignant = ", num_malignant, " num_benign = ", num_benign);
-         # if num_malignant > num_benign:
-         #     finalResult[i].get('predicted_diagnosis') = 'M';
-         # else:
-         #     finalResult[i].get('predicted_diagnosis') = 'M';
 
+        if num_malignant > num_benign:
+            updatePredictedDiagnosisToMalignant = {'predicted_diagnosis': 'M'}
+            finalResult[i].update(updatePredictedDiagnosisToMalignant);
+        else:
+            updatePredictedDiagnosisToBenign = {'predicted_diagnosis': 'B'}
+            finalResult[i].update(updatePredictedDiagnosisToBenign);
 
+        num_of_correct_predictions = 0;
+        num_of_wrong_predictions = 0;
+        for i in range(0, len(finalResult)):
+            for k in range(0, len(completeDataSet)):
+                if finalResult[i].get('info')[0].get('id_point_test') == completeDataSet[k].get('id'):
+                    print(finalResult[i].get('info')[0].get('id_point_test'), ' == ', completeDataSet[k].get('id'));
+                    if finalResult[i].get('predicted_diagnosis') == completeDataSet[k].get('diagnosis'):
+                        print("is predictedCORRECT!");
+                        print("Predicted Diagnosis = ", finalResult[i].get('predicted_diagnosis'),
+                              " Actual Diagnosis = ", completeDataSet[k].get('diagnosis'));
+                        num_of_correct_predictions = num_of_correct_predictions + 1;
+                        break;
+                    else:
+                        print("is predicted WRONG!");
+                        num_of_wrong_predictions = num_of_wrong_predictions + 1;
+                        print("Predicted Diagnosis = ", finalResult[i].get('predicted_diagnosis'),
+                              " Actual Diagnosis = ", completeDataSet[k].get('diagnosis'));
+                        break;
 
-       # print("i = ", i, " num_malignant = ", num_malignant, " num_benign = ", num_benign, "predict = ", finalResult[i].get('predicted_diagnosis'));
-           # print(K_lowest_distances);
-
-    #     testDataSet[i].append(K_lowest_distances);
-    #
-    # #Loops through the entire list to calculate a label
-    # for i in range(0, K):
-    #     num_malignant = 0;
-    #     num_benign = 0;
-    #     #loop through K number of shortest distance
-    #     #for j in range(0, K):
-
-
-    #    id =              row[0]
-    #    diagnosis =       row[1]
-    #    radius_mean =     row[2]
-    #    texture_mean =    row[3]
-    #    smoothness_mean = row[6]
-
-
-#print(distance[0][2]);
+        print("Correct Prediction Rate: ", num_of_correct_predictions / len(testDataSet), num_of_correct_predictions,
+              " ", len(testDataSet));
