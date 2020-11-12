@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     # structure holding (int id), (char diagnosis), (float radius_mean), (float texture_mean), (float smoothness_mean)
     trainingDataSet = [];
-    K = 3;
+    K = 7;
     K_lowest_distances = [];
     index = 0;
     with open('data.csv') as csvfile:
@@ -94,23 +94,24 @@ if __name__ == '__main__':
             finalResult.append({'info': K_lowest_distances[i:i+K], 'predicted_diagnosis': None});
             i = i + K + 1
 
-print(finalResult);
-    #print(finalResult);
-    # for i in range(0, 1):
-    #     num_malignant = 0;
-    #     num_benign = 0;
-    #
-    #     for k in range(0, K): #loops through all the 'actual_diagnosis_from_training'
-    #         #print("**** i = ", i, "**** ", finalResult[k].get('info').get('actual_diagnosis_from_training'));
-    #         if finalResult[k].get('info').get('actual_diagnosis_from_training') == 'M':
-    #             num_malignant = num_malignant + 1;
-    #         elif finalResult[k].get('info').get('actual_diagnosis_from_training') == 'B':
-    #             num_benign = num_benign + 1;
 
-             # if num_malignant > num_benign:
-             #     finalResult[i].get('predicted_diagnosis') = 'M';
-             # else:
-             #     finalResult[i].get('predicted_diagnosis') = 'M';
+    print(finalResult[0].get('info')[2].get('actual_diagnosis_from_training') );
+    for i in range(0, len(finalResult)):
+        num_malignant = 0;
+        num_benign = 0;
+
+        for k in range(0, K): #loops through all the 'actual_diagnosis_from_training'
+            print(finalResult[i].get('info')[k]);
+            if finalResult[i].get('info')[k].get('actual_diagnosis_from_training') == 'M':
+                num_malignant = num_malignant + 1;
+            elif finalResult[i].get('info')[k].get('actual_diagnosis_from_training')== 'B':
+                num_benign = num_benign + 1;
+
+        print("num_malignant = ", num_malignant, " num_benign = ", num_benign);
+         # if num_malignant > num_benign:
+         #     finalResult[i].get('predicted_diagnosis') = 'M';
+         # else:
+         #     finalResult[i].get('predicted_diagnosis') = 'M';
 
 
 
