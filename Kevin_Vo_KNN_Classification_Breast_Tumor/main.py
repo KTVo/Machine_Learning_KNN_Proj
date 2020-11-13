@@ -16,11 +16,17 @@
 
 import csv
 import math
+import random
+
+import numpy as np
+import matplotlib.pyplot as plt
 
 distance = [];
 testDataSet = [];
 finalResult = [];
 completeDataSet = []; # used to compare and test accuracy
+
+X
 
 
 def get_distance(distance):
@@ -33,34 +39,46 @@ def findDistance(x1, x2, y1, y2, z1, z2):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
-    #    id =              row[0]
-    #    diagnosis =       row[1]
-    #    radius_mean =     row[2]
-    #    texture_mean =    row[3]
-    #    smoothness_mean = row[6]
+    #    id =              col[0]
+    #    diagnosis =       col[1]
+    #    radius_mean =     col[2]
+    #    texture_mean =    col[3]
+    #    smoothness_mean = col[6]
 
 
     # structure holding (int id), (char diagnosis), (float radius_mean), (float texture_mean), (float smoothness_mean)
     trainingDataSet = [];
-    K = 7;
+    K = 6;
     K_lowest_distances = [];
-    index = 0;
+
     with open('data.csv') as csvfile:
         data_set = csv.reader(csvfile, delimiter=",")
 
         next(data_set) #skips the first row which are just labels for each column
         #populates tuple with only usable data
         for col in data_set:
-            completeDataSet.append({'id': int(col[0]), 'diagnosis': col[1], 'radius_mean': float(col[2]), 'texture_mean': float(col[3]), 'smoothness_mean': float(col[6])});
+            completeDataSet.append({'id': int(col[0]), 'diagnosis': col[1], 'radius_mean': float(col[2]),
+                                    'texture_mean': float(col[3]), 'smoothness_mean': float(col[6])});
 
-            if index == 0 or index == 100 or index == 200 or index == 300 or index == 400 or index == 500:
-                testDataSet.append({'id': int(col[0]), 'diagnosis': col[1], 'radius_mean': float(col[2]), 'texture_mean': float(col[3]), 'smoothness_mean': float(col[6])});
+            if random.randint(0, 1000) < 50:
+                testDataSet.append({'id': int(col[0]), 'diagnosis': col[1], 'radius_mean': float(col[2]),
+                                    'texture_mean': float(col[3]), 'smoothness_mean': float(col[6])});
             else:
-                trainingDataSet.append({'id': int(col[0]), 'diagnosis': col[1], 'radius_mean': float(col[2]), 'texture_mean': float(col[3]), 'smoothness_mean': float(col[6])});
+                trainingDataSet.append({'id': int(col[0]), 'diagnosis': col[1], 'radius_mean': float(col[2]),
+                                        'texture_mean': float(col[3]), 'smoothness_mean': float(col[6])});
 
-            index = index + 1;
 
     csvfile.close();
+
+    #setting up and generating 3D graph to plot
+    fig = plt.figure();
+    ax = fig.gca(projection='3d');
+
+    #setting up colors for scatter plot data
+    colors = ('r', 'g', 'b', 'k')
+
+    np
+
 
 
 
@@ -70,6 +88,7 @@ if __name__ == '__main__':
     for i in range(0, length_testing_set):      #outer loop through all testing points
         for j in range(0, length_tranining_set): #inner loop finds distances betwen a testing point with all training points
             if i != j:
+
                 #the distance list contains the two training
                 distance.append({'id_point_test': testDataSet[i].get('id'), 'id_point_train': trainingDataSet[j].get('id'),
                                  'actual_diagnosis_from_training': trainingDataSet[j].get('diagnosis'),
@@ -94,7 +113,6 @@ if __name__ == '__main__':
             finalResult.append({'info': K_lowest_distances[i:i+K], 'predicted_diagnosis': None});
             i = i + K + 1
 
-    print("4646581 - ", finalResult[0].get('info')[0].get('predicted_diagnosis'))
 
     print(finalResult[0].get('info')[2].get('actual_diagnosis_from_training') );
     for i in range(0, len(finalResult)):
@@ -136,5 +154,5 @@ if __name__ == '__main__':
                               " Actual Diagnosis = ", completeDataSet[k].get('diagnosis'));
                         break;
 
-        print("Correct Prediction Rate: ", num_of_correct_predictions / len(testDataSet), num_of_correct_predictions,
-              " ", len(testDataSet));
+        print("Correct Prediction Rate: ", num_of_correct_predictions / len(testDataSet), ", Number of Correct Predictions: ", num_of_correct_predictions,
+              ", Number of Wrong Predictions:", len(testDataSet));
