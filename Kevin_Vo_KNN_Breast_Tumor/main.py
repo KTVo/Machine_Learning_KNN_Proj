@@ -66,7 +66,7 @@ if __name__ == '__main__':
 
     # structure holding (int id), (char diagnosis), (float radius_mean), (float texture_mean), (float smoothness_mean)
     trainingDataSet = [];
-    K = 6;
+    K = 7;
     K_lowest_distances = [];
 
     with open('data.csv') as csvfile:
@@ -86,9 +86,9 @@ if __name__ == '__main__':
                     testingSetM_smooth_y.append(float(col[6]));  # training set  M: -, Red
                     testingSetM_texture_z.append(float(col[3]));  # training set  M: -, Red
                 else:
-                    testingSetB_radius_x.append(float(col[2]))  # training set  M: -, Red
-                    testingSetB_smooth_y.append(float(col[6]));  # training set  M: -, Red
-                    testingSetB_texture_z.append(float(col[3]));  # training set  M: -, Red
+                    testingSetB_radius_x.append(float(col[2]))  # training set  B: -, Red
+                    testingSetB_smooth_y.append(float(col[6]));  # training set  B: -, Red
+                    testingSetB_texture_z.append(float(col[3]));  # training set  B: -, Red
 
             else:
                 trainingDataSet.append({'id': int(col[0]), 'diagnosis': col[1], 'radius_mean': float(col[2]),
@@ -130,6 +130,7 @@ if __name__ == '__main__':
 
         # sort the of one testingDataSet distances in descending order
         distance.sort(key=get_distance);
+
         for countTopK in range(0, K):
             K_lowest_distances.append(distance[countTopK]);
 
@@ -181,8 +182,9 @@ if __name__ == '__main__':
                         #      " Actual Diagnosis = ", completeDataSet[k].get('diagnosis'));
                         break;
 
-        #print("Correct Prediction Rate: ", num_of_correct_predictions / len(testDataSet), ", Number of Correct Predictions: ", num_of_correct_predictions,
-        #      ", Number of Wrong Predictions:", len(testDataSet));
+    print("Correct Prediction Rate: ", num_of_correct_predictions / len(testDataSet), ", Number of Correct Predictions: ",
+          num_of_correct_predictions, ", Total Size of Testing Set:", len(testDataSet),
+          ", Total Size of Entire Data Set: ", len(completeDataSet));
 
     ax.scatter(trainingSetB_radius_x, trainingSetB_smooth_y, trainingSetB_texture_z, c='b', marker='+');
 
@@ -195,3 +197,10 @@ if __name__ == '__main__':
     ax.set_xlabel('radius_mean')
     ax.set_ylabel('smoothness_mean')
     ax.set_zlabel('texture_mean')
+
+    ax.set_zlim(0, 25.0);
+
+    plt.xlim(0, 22.0);
+    plt.ylim(0.09, 0.18);
+
+    plt.show();
