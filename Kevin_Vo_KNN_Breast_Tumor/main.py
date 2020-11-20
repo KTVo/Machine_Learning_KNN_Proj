@@ -7,7 +7,7 @@
 #Description:   This assignment will used the KNN (K-Nearest Neighbors) Algorithm to classify existing breast tumors
 #               as malignant or benign based on a data set that was gathered from the source below. In this case, we'll
 #               use vales from the mean_smoothness, mean_texture, and radius from the given data set. Within this data set
-#               most of the values will be used as the training set were some will be extracted to only be used a the
+#               most of the values will be used as the training set were some will be extracted to only be used as the
 #               testing set.
 
 #Source of Data Set: https://www.kaggle.com/uciml/breast-cancer-wisconsin-data
@@ -48,25 +48,25 @@ if __name__ == '__main__':
     #    texture_mean =    col[3]
     #    smoothness_mean = col[6]
 
-    trainingSetB_radius_x = [];  # training set  B: +, Blue
-    trainingSetB_smooth_y = [];  # training set  B: +, Blue
-    trainingSetB_texture_z = [];  # training set  B: +, Blue
+    trainingSetB_radius_x = [];  # training set  B: -, Blue
+    trainingSetB_smooth_y = [];  # training set  B: -, Blue
+    trainingSetB_texture_z = [];  # training set  B: -, Blue
 
-    trainingSetM_radius_x = [];  # training set  M: -, Blue
-    trainingSetM_smooth_y = [];  # training set  M: -, Blue
-    trainingSetM_texture_z = [];  # training set  M: -, Blue
+    trainingSetM_radius_x = [];  # training set  M: +, Blue
+    trainingSetM_smooth_y = [];  # training set  M: +, Blue
+    trainingSetM_texture_z = [];  # training set  M: +, Blue
 
-    testingSetB_radius_x = [];  # training set  B: +, Red
-    testingSetB_smooth_y = [];  # training set  B: +, Red
-    testingSetB_texture_z = [];  # training set  B: +, Red
+    testingSetB_radius_x = [];  # training set  B: -, Red
+    testingSetB_smooth_y = [];  # training set  B: -, Red
+    testingSetB_texture_z = [];  # training set  B:-+, Red
 
-    testingSetM_radius_x = [];  # training set  M: -, Red
-    testingSetM_smooth_y = [];  # training set  M: -, Red
-    testingSetM_texture_z = [];  # training set  M: -, Red
+    testingSetM_radius_x = [];  # training set  M: +, Red
+    testingSetM_smooth_y = [];  # training set  M: +, Red
+    testingSetM_texture_z = [];  # training set  M: +, Red
 
     # structure holding (int id), (char diagnosis), (float radius_mean), (float texture_mean), (float smoothness_mean)
     trainingDataSet = [];
-    K = 7;
+    K = 5;
     K_lowest_distances = [];
 
     with open('data.csv') as csvfile:
@@ -82,9 +82,9 @@ if __name__ == '__main__':
                 testDataSet.append({'id': int(col[0]), 'diagnosis': col[1], 'radius_mean': float(col[2]),
                                     'texture_mean': float(col[3]), 'smoothness_mean': float(col[6])});
                 if col[1] == 'M':
-                    testingSetM_radius_x.append(float(col[2]))  # training set  M: -, Red
-                    testingSetM_smooth_y.append(float(col[6]));  # training set  M: -, Red
-                    testingSetM_texture_z.append(float(col[3]));  # training set  M: -, Red
+                    testingSetM_radius_x.append(float(col[2]))  # training set  M: +, Red
+                    testingSetM_smooth_y.append(float(col[6]));  # training set  M: +, Red
+                    testingSetM_texture_z.append(float(col[3]));  # training set  M: +, Red
                 else:
                     testingSetB_radius_x.append(float(col[2]))  # training set  B: -, Red
                     testingSetB_smooth_y.append(float(col[6]));  # training set  B: -, Red
@@ -95,13 +95,13 @@ if __name__ == '__main__':
                                         'texture_mean': float(col[3]), 'smoothness_mean': float(col[6])});
 
                 if col[1] == 'M':
-                    trainingSetM_radius_x.append(float(col[2]));  # training set  M: -, Blue
-                    trainingSetM_smooth_y.append(float(col[6]));  # training set  M: -, Blue
-                    trainingSetM_texture_z.append(float(col[3]));  # training set  M: -, Blue
+                    trainingSetM_radius_x.append(float(col[2]));  # training set  M: +, Blue
+                    trainingSetM_smooth_y.append(float(col[6]));  # training set  M: +, Blue
+                    trainingSetM_texture_z.append(float(col[3]));  # training set  M: +, Blue
                 else:
-                    trainingSetB_radius_x.append(float(col[2]));  # training set  B: +, Blue
-                    trainingSetB_smooth_y.append(float(col[6]));  # training set  B: +, Blue
-                    trainingSetB_texture_z.append(float(col[3]));  # training set  B: +, Blue
+                    trainingSetB_radius_x.append(float(col[2]));  # training set  B: -, Blue
+                    trainingSetB_smooth_y.append(float(col[6]));  # training set  B: -, Blue
+                    trainingSetB_texture_z.append(float(col[3]));  # training set  B: -, Blue
     csvfile.close();
 
 
@@ -163,36 +163,37 @@ if __name__ == '__main__':
             updatePredictedDiagnosisToBenign = {'predicted_diagnosis': 'B'}
             finalResult[i].update(updatePredictedDiagnosisToBenign);
 
-        num_of_correct_predictions = 0;
-        num_of_wrong_predictions = 0;
-        for i in range(0, len(finalResult)):
-            for k in range(0, len(completeDataSet)):
-                if finalResult[i].get('info')[0].get('id_point_test') == completeDataSet[k].get('id'):
-                    #print(finalResult[i].get('info')[0].get('id_point_test'), ' == ', completeDataSet[k].get('id'));
-                    if finalResult[i].get('predicted_diagnosis') == completeDataSet[k].get('diagnosis'):
-                        #print("is predictedCORRECT!");
-                        #print("Predicted Diagnosis = ", finalResult[i].get('predicted_diagnosis'),
-                        #      " Actual Diagnosis = ", completeDataSet[k].get('diagnosis'));
-                        num_of_correct_predictions = num_of_correct_predictions + 1;
-                        break;
-                    else:
-                        #("is predicted WRONG!");
-                        num_of_wrong_predictions = num_of_wrong_predictions + 1;
-                       # print("Predicted Diagnosis = ", finalResult[i].get('predicted_diagnosis'),
-                        #      " Actual Diagnosis = ", completeDataSet[k].get('diagnosis'));
-                        break;
+    num_of_correct_predictions = 0;
+    num_of_wrong_predictions = 0;
+    print('\nPrediction Results for All Testing Inputs:\n')
+    for i in range(0, len(finalResult)):
+        print('Test Input#', i+1, ' -> ID: ', finalResult[i].get('info')[0].get('id_point_test'), ' -> ', end =" ");
+        if finalResult[i].get('predicted_diagnosis') == finalResult[i].get('info')[0].get('actual_diagnosis_from_training'):
+            print("was predicted CORRECTLY!");
+            print("Predicted Diagnosis = ", finalResult[i].get('predicted_diagnosis'),
+                  " Actual Diagnosis = ", completeDataSet[k].get('diagnosis'), '\n');
+            num_of_correct_predictions = num_of_correct_predictions + 1;
+        else:
+            print("was predicted WRONG!");
+            num_of_wrong_predictions = num_of_wrong_predictions + 1;
+            print("Predicted Diagnosis = ", finalResult[i].get('predicted_diagnosis'),
+                  " Actual Diagnosis = ", completeDataSet[k].get('diagnosis'), '\n');
 
     print("Correct Prediction Rate: ", num_of_correct_predictions / len(testDataSet), ", Number of Correct Predictions: ",
           num_of_correct_predictions, ", Total Size of Testing Set:", len(testDataSet),
           ", Total Size of Entire Data Set: ", len(completeDataSet));
 
-    ax.scatter(trainingSetB_radius_x, trainingSetB_smooth_y, trainingSetB_texture_z, c='b', marker='+');
+    print("\nLabel Definitions for the scatter plot:");
+    print("\tRed  -> A point from the Testing Set\n\tBlue -> A point from the Training Set\n\t+    -> Malignant Tumor" +
+          "\n\t-    -> Benign Tumor");
 
-    ax.scatter(trainingSetM_radius_x, trainingSetM_smooth_y, trainingSetM_texture_z, c='b', marker='_');
+    ax.scatter(trainingSetB_radius_x, trainingSetB_smooth_y, trainingSetB_texture_z, c='b', marker='_');
 
-    ax.scatter(testingSetB_radius_x, testingSetB_smooth_y, testingSetB_texture_z, c='r', marker='+');
+    ax.scatter(trainingSetM_radius_x, trainingSetM_smooth_y, trainingSetM_texture_z, c='b', marker='+');
 
-    ax.scatter(testingSetM_radius_x, testingSetM_smooth_y, testingSetM_texture_z, c='r', marker='_');
+    ax.scatter(testingSetB_radius_x, testingSetB_smooth_y, testingSetB_texture_z, c='r', marker='_');
+
+    ax.scatter(testingSetM_radius_x, testingSetM_smooth_y, testingSetM_texture_z, c='r', marker='+');
 
     ax.set_xlabel('radius_mean')
     ax.set_ylabel('smoothness_mean')
