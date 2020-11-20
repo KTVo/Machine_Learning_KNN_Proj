@@ -28,7 +28,6 @@ ax = fig.add_subplot(111, projection='3d')
 distance = [];
 testDataSet = [];
 finalResult = [];
-completeDataSet = []; # used to compare and test accuracy
 
 
 
@@ -68,6 +67,7 @@ if __name__ == '__main__':
     trainingDataSet = [];
     K = 5;
     K_lowest_distances = [];
+    total_num_of_data = 0;
 
     with open('data.csv') as csvfile:
         data_set = csv.reader(csvfile, delimiter=",")
@@ -75,9 +75,7 @@ if __name__ == '__main__':
         next(data_set) #skips the first row which are just labels for each column
         #populates tuple with only usable data
         for col in data_set:
-            completeDataSet.append({'id': int(col[0]), 'diagnosis': col[1], 'radius_mean': float(col[2]),
-                                    'texture_mean': float(col[3]), 'smoothness_mean': float(col[6])});
-
+            total_num_of_data = total_num_of_data + 1;
             if random.randint(0, 1000) < 50:
                 testDataSet.append({'id': int(col[0]), 'diagnosis': col[1], 'radius_mean': float(col[2]),
                                     'texture_mean': float(col[3]), 'smoothness_mean': float(col[6])});
@@ -171,17 +169,17 @@ if __name__ == '__main__':
         if finalResult[i].get('predicted_diagnosis') == finalResult[i].get('info')[0].get('actual_diagnosis_from_training'):
             print("was predicted CORRECTLY!");
             print("Predicted Diagnosis = ", finalResult[i].get('predicted_diagnosis'),
-                  " Actual Diagnosis = ", completeDataSet[k].get('diagnosis'), '\n');
+                  " Actual Diagnosis = ", finalResult[i].get('info')[0].get('actual_diagnosis_from_training'), '\n');
             num_of_correct_predictions = num_of_correct_predictions + 1;
         else:
             print("was predicted WRONG!");
             num_of_wrong_predictions = num_of_wrong_predictions + 1;
             print("Predicted Diagnosis = ", finalResult[i].get('predicted_diagnosis'),
-                  " Actual Diagnosis = ", completeDataSet[k].get('diagnosis'), '\n');
+                  " Actual Diagnosis = ", finalResult[i].get('info')[0].get('actual_diagnosis_from_training'), '\n');
 
-    print("Correct Prediction Rate: ", num_of_correct_predictions / len(testDataSet), ", Number of Correct Predictions: ",
+    print("\tEvaluation of the KNN ==> Correct Prediction Rate: ", num_of_correct_predictions / len(testDataSet), ", Number of Correct Predictions: ",
           num_of_correct_predictions, ", Total Size of Testing Set:", len(testDataSet),
-          ", Total Size of Entire Data Set: ", len(completeDataSet));
+          ", Total Size of Entire Data Set: ", total_num_of_data);
 
     print("\nLabel Definitions for the scatter plot:");
     print("\tRed  -> A point from the Testing Set\n\tBlue -> A point from the Training Set\n\t+    -> Malignant Tumor" +
