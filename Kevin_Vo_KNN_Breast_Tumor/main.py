@@ -17,29 +17,57 @@
 import csv
 import math
 import random
-import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 
 #setting up graph
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
-distance = [];
-testDataSet = [];
+distance = [];              #Stores the distances
+testDataSet = [];           #Stores all data for the testing
 finalResult = [];
 
+trainingSetB_radius_x = [];  # training set  B: -, Blue
+trainingSetB_smooth_y = [];  # training set  B: -, Blue
+trainingSetB_texture_z = [];  # training set  B: -, Blue
+
+trainingSetM_radius_x = [];  # training set  M: +, Blue
+trainingSetM_smooth_y = [];  # training set  M: +, Blue
+trainingSetM_texture_z = [];  # training set  M: +, Blue
+
+testingSetB_radius_x = [];  # training set  B: -, Red
+testingSetB_smooth_y = [];  # training set  B: -, Red
+testingSetB_texture_z = [];  # training set  B:-+, Red
+
+testingSetM_radius_x = [];  # training set  M: +, Red
+testingSetM_smooth_y = [];  # training set  M: +, Red
+testingSetM_texture_z = [];  # training set  M: +, Red
+
+# structure holding (int id), (char diagnosis), (float radius_mean), (float texture_mean), (float smoothness_mean)
+trainingDataSet = [];
+K = 5;
+K_lowest_distances = [];
+total_num_of_data = 0;
 
 
 def get_distance(distance):
     return distance.get('distance');
 
+#find the 3D distance where,
+# x1 -> radius means from testDataSet
+# x2 -> radius means from trainingDataSet
+# y1 -> smoothness means from testDataSet
+# y2 -> smoothness means from trainingDataSet
+# z1 -> texture means from testDataSet
+# z2 -> texture means from trainingDataSet
 def findDistance(x1, x2, y1, y2, z1, z2):
     return math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) + (z1-z2)*(z1-z2))
 
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
+#Populates both the testing set and training set
+# ~90% of total data entry will go to training set
+# the rest of the data entries will go to testing set
+# data instances in training set will not appear under testing set and vice versa
+def populateLists():
 
     #    id =              col[0]
     #    diagnosis =       col[1]
@@ -47,28 +75,7 @@ if __name__ == '__main__':
     #    texture_mean =    col[3]
     #    smoothness_mean = col[6]
 
-    trainingSetB_radius_x = [];  # training set  B: -, Blue
-    trainingSetB_smooth_y = [];  # training set  B: -, Blue
-    trainingSetB_texture_z = [];  # training set  B: -, Blue
-
-    trainingSetM_radius_x = [];  # training set  M: +, Blue
-    trainingSetM_smooth_y = [];  # training set  M: +, Blue
-    trainingSetM_texture_z = [];  # training set  M: +, Blue
-
-    testingSetB_radius_x = [];  # training set  B: -, Red
-    testingSetB_smooth_y = [];  # training set  B: -, Red
-    testingSetB_texture_z = [];  # training set  B:-+, Red
-
-    testingSetM_radius_x = [];  # training set  M: +, Red
-    testingSetM_smooth_y = [];  # training set  M: +, Red
-    testingSetM_texture_z = [];  # training set  M: +, Red
-
-    # structure holding (int id), (char diagnosis), (float radius_mean), (float texture_mean), (float smoothness_mean)
-    trainingDataSet = [];
-    K = 5;
-    K_lowest_distances = [];
-    total_num_of_data = 0;
-
+    global total_num_of_data;
     with open('data.csv') as csvfile:
         data_set = csv.reader(csvfile, delimiter=",")
 
@@ -76,7 +83,8 @@ if __name__ == '__main__':
         #populates tuple with only usable data
         for col in data_set:
             total_num_of_data = total_num_of_data + 1;
-            if random.randint(0, 1000) < 50:
+
+            if random.randint(0, 500) < 50:
                 testDataSet.append({'id': int(col[0]), 'diagnosis': col[1], 'radius_mean': float(col[2]),
                                     'texture_mean': float(col[3]), 'smoothness_mean': float(col[6])});
                 if col[1] == 'M':
@@ -102,29 +110,25 @@ if __name__ == '__main__':
                     trainingSetB_texture_z.append(float(col[3]));  # training set  B: -, Blue
     csvfile.close();
 
-
-
-
-
-
-    length_tranining_set = len(trainingDataSet);
-    length_testing_set = len(testDataSet);
-
-    for i in range(0, length_testing_set):      #outer loop through all testing points
-        for j in range(0, length_tranining_set): #inner loop finds distances betwen a testing point with all training points
+#Calls the findDistance function between a
+def getStoreDistance():
+    for i in range(0, len(testDataSet)):  # outer loop through all testing points
+        for j in range(0, len(trainingDataSet)):  # inner loop finds distances betwen a testing point with all training points
             if i != j:
+                # the distance list contains the two training
+                distance.append(
+                    {'id_point_test': testDataSet[i].get('id'), 'id_point_train': trainingDataSet[j].get('id'),
+                     'actual_diagnosis_from_training': trainingDataSet[j].get('diagnosis'),
+                     'distance': findDistance(float(testDataSet[i].get('radius_mean')),
+                                              float(trainingDataSet[j].get('radius_mean')),
+                                              float(testDataSet[i].get('texture_mean')),
+                                              float(trainingDataSet[j].get('texture_mean')),
+                                              float(testDataSet[i].get('smoothness_mean')),
+                                              float(trainingDataSet[j].get('smoothness_mean'))
+                                              )
+                     },
 
-                #the distance list contains the two training
-                distance.append({'id_point_test': testDataSet[i].get('id'), 'id_point_train': trainingDataSet[j].get('id'),
-                                 'actual_diagnosis_from_training': trainingDataSet[j].get('diagnosis'),
-                                  'distance': findDistance(float(testDataSet[i].get('radius_mean')), float(trainingDataSet[j].get('radius_mean')),
-                                                           float(testDataSet[i].get('texture_mean')), float(trainingDataSet[j].get('texture_mean')),
-                                                           float(testDataSet[i].get('smoothness_mean')), float(trainingDataSet[j].get('smoothness_mean'))
-                                                          )
-                                  },
-
-                               )
-
+                    )
 
         # sort the of one testingDataSet distances in descending order
         distance.sort(key=get_distance);
@@ -132,27 +136,25 @@ if __name__ == '__main__':
         for countTopK in range(0, K):
             K_lowest_distances.append(distance[countTopK]);
 
-        #print(K_lowest_distances);
+        # print(K_lowest_distances);
         distance.clear();
-    for i in range(0, len(K_lowest_distances)-1):
-        if(i%K == 0):
-            finalResult.append({'info': K_lowest_distances[i:i+K], 'predicted_diagnosis': None});
+
+    for i in range(0, len(K_lowest_distances) - 1):
+        if (i % K == 0):
+            finalResult.append({'info': K_lowest_distances[i:i + K], 'predicted_diagnosis': None});
             i = i + K + 1
 
-
-    #print(finalResult[0].get('info')[2].get('actual_diagnosis_from_training') );
+#Calculates the predicted values of each testing instance then assigns it
+def calculatePrediction():
     for i in range(0, len(finalResult)):
         num_malignant = 0;
         num_benign = 0;
 
-        for k in range(0, K): #loops through all the 'actual_diagnosis_from_training'
-            #print(finalResult[i].get('info')[k]);
+        for k in range(0, K):  # loops through all the 'actual_diagnosis_from_training'
             if finalResult[i].get('info')[k].get('actual_diagnosis_from_training') == 'M':
                 num_malignant = num_malignant + 1;
             elif finalResult[i].get('info')[k].get('actual_diagnosis_from_training') == 'B':
                 num_benign = num_benign + 1;
-
-        #print("num_malignant = ", num_malignant, " num_benign = ", num_benign);
 
         if num_malignant > num_benign:
             updatePredictedDiagnosisToMalignant = {'predicted_diagnosis': 'M'}
@@ -161,12 +163,16 @@ if __name__ == '__main__':
             updatePredictedDiagnosisToBenign = {'predicted_diagnosis': 'B'}
             finalResult[i].update(updatePredictedDiagnosisToBenign);
 
+#Calculates the accuracy of the predict results then display predicted results individually
+#along with displaying the evulation details of the KNN for taht run
+def displayTextResults():
     num_of_correct_predictions = 0;
     num_of_wrong_predictions = 0;
-    print('\nPrediction Results for All Testing Inputs:\n')
+    print("\nPrediction Results for All Testing Inputs:\n\tLet K =", K,"\n")
     for i in range(0, len(finalResult)):
-        print('Test Input#', i+1, ' -> ID: ', finalResult[i].get('info')[0].get('id_point_test'), ' -> ', end =" ");
-        if finalResult[i].get('predicted_diagnosis') == finalResult[i].get('info')[0].get('actual_diagnosis_from_training'):
+        print('Test Input#', i + 1, ' -> ID: ', finalResult[i].get('info')[0].get('id_point_test'), ' -> ', end=" ");
+        if finalResult[i].get('predicted_diagnosis') == finalResult[i].get('info')[0].get(
+                'actual_diagnosis_from_training'):
             print("was predicted CORRECTLY!");
             print("Predicted Diagnosis = ", finalResult[i].get('predicted_diagnosis'),
                   " Actual Diagnosis = ", finalResult[i].get('info')[0].get('actual_diagnosis_from_training'), '\n');
@@ -177,14 +183,18 @@ if __name__ == '__main__':
             print("Predicted Diagnosis = ", finalResult[i].get('predicted_diagnosis'),
                   " Actual Diagnosis = ", finalResult[i].get('info')[0].get('actual_diagnosis_from_training'), '\n');
 
-    print("\tEvaluation of the KNN ==> Correct Prediction Rate: ", num_of_correct_predictions / len(testDataSet), ", Number of Correct Predictions: ",
-          num_of_correct_predictions, ", Total Size of Testing Set:", len(testDataSet),
-          ", Total Size of Entire Data Set: ", total_num_of_data);
+    print("\tEvaluation of the KNN ==> For K =", K, ":\n\t\tCorrect Prediction Rate:",
+          "{:.2f}".format((num_of_correct_predictions / len(testDataSet))*100) + "%",
+          "\n\t\tNumber of Correct Predictions:",
+          num_of_correct_predictions, "\n\t\tTotal Size of Testing Set:", len(testDataSet),
+          "\n\t\tTotal Size of Entire Data Set:", total_num_of_data);
 
     print("\nLabel Definitions for the scatter plot:");
     print("\tRed  -> A point from the Testing Set\n\tBlue -> A point from the Training Set\n\t+    -> Malignant Tumor" +
           "\n\t-    -> Benign Tumor");
 
+#Generates 3D-scatter plot
+def displayGraph():
     ax.scatter(trainingSetB_radius_x, trainingSetB_smooth_y, trainingSetB_texture_z, c='b', marker='_');
 
     ax.scatter(trainingSetM_radius_x, trainingSetM_smooth_y, trainingSetM_texture_z, c='b', marker='+');
@@ -203,3 +213,16 @@ if __name__ == '__main__':
     plt.ylim(0.09, 0.18);
 
     plt.show();
+
+
+#The main calling all the other functions
+if __name__ == '__main__':
+    populateLists();       #populates all the lists
+
+    getStoreDistance();    #calculate then store the distances
+
+    calculatePrediction(); #Calculate then store the predicted outcome for each testing instance w/in testing set
+
+    displayTextResults();  #Display relevant results of the prediction along with algo. evulation details
+
+    displayGraph();        #Generates 3D-scatter plot graph based on the KNN classification algo.
