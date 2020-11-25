@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 #setting up graph
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-
+CompleteDataSet = [];
 distance = [];              #Stores the distances
 testDataSet = [];           #Stores all data for the testing
 finalResult = [];
@@ -45,7 +45,7 @@ testingSetM_texture_z = [];  # training set  M: +, Red
 
 # structure holding (int id), (char diagnosis), (float radius_mean), (float texture_mean), (float smoothness_mean)
 trainingDataSet = [];
-K = 5;
+K = 3;
 K_lowest_distances = [];
 total_num_of_data = 0;
 
@@ -55,11 +55,11 @@ def get_distance(distance):
 
 
 def normalization(subDataSet):
-    min = subDataSet.min();
-    max = subDataSet.max();
+    minVal = min(subDataSet);
+    maxVal = max(subDataSet);
     sizeOfDataSet = len(subDataSet);
     for i in range(0, sizeOfDataSet):
-        subDataSet = subDataSet([i] - min)/(max-min);
+        subDataSet[i] = (subDataSet[i] - minVal)/(maxVal-minVal);
 
 #find the 3D distance where,
 # x1 -> radius means from testDataSet
@@ -83,6 +83,12 @@ def populateLists():
     #    texture_mean =    col[3]
     #    smoothness_mean = col[6]
 
+    tempID = [];
+    tempDiagnosis =[];
+    tempRadius = [];
+    tempTexture =[];
+    tempSmooth = [];
+
     global total_num_of_data;
     with open('data.csv') as csvfile:
         data_set = csv.reader(csvfile, delimiter=",")
@@ -91,32 +97,49 @@ def populateLists():
         #populates tuple with only usable data
         for col in data_set:
             total_num_of_data = total_num_of_data + 1;
+            tempID.append(int(col[0]));
+            tempDiagnosis.append(col[1]);
+            tempRadius.append(float(col[2]));
+            tempTexture.append(float(col[3]));
+            tempSmooth.append(float(col[6]));
 
-            if random.randint(0, 500) < 50:
-                testDataSet.append({'id': int(col[0]), 'diagnosis': col[1], 'radius_mean': float(col[2]),
-                                    'texture_mean': float(col[3]), 'smoothness_mean': float(col[6])});
-                if col[1] == 'M':
-                    testingSetM_radius_x.append(float(col[2]))  # training set  M: +, Red
-                    testingSetM_smooth_y.append(float(col[6]));  # training set  M: +, Red
-                    testingSetM_texture_z.append(float(col[3]));  # training set  M: +, Red
-                else:
-                    testingSetB_radius_x.append(float(col[2]))  # training set  B: -, Red
-                    testingSetB_smooth_y.append(float(col[6]));  # training set  B: -, Red
-                    testingSetB_texture_z.append(float(col[3]));  # training set  B: -, Red
 
-            else:
-                trainingDataSet.append({'id': int(col[0]), 'diagnosis': col[1], 'radius_mean': float(col[2]),
-                                        'texture_mean': float(col[3]), 'smoothness_mean': float(col[6])});
 
-                if col[1] == 'M':
-                    trainingSetM_radius_x.append(float(col[2]));  # training set  M: +, Blue
-                    trainingSetM_smooth_y.append(float(col[6]));  # training set  M: +, Blue
-                    trainingSetM_texture_z.append(float(col[3]));  # training set  M: +, Blue
-                else:
-                    trainingSetB_radius_x.append(float(col[2]));  # training set  B: -, Blue
-                    trainingSetB_smooth_y.append(float(col[6]));  # training set  B: -, Blue
-                    trainingSetB_texture_z.append(float(col[3]));  # training set  B: -, Blue
+
+
     csvfile.close();
+
+    normalization(tempRadius);
+    normalization(tempTexture);
+    normalization(tempSmooth);
+
+
+    for indexAll in range(0, total_num_of_data):
+        if random.randint(0, 500) < 50:
+            testDataSet.append({'id': tempID[indexAll], 'diagnosis': tempDiagnosis[indexAll], 'radius_mean': tempRadius[indexAll],
+                                'texture_mean': tempTexture[indexAll], 'smoothness_mean': tempSmooth[indexAll]});
+            if tempDiagnosis[indexAll] == 'M':
+                testingSetM_radius_x.append(tempRadius[indexAll])  # training set  M: +, Red
+                testingSetM_smooth_y.append(tempTexture[indexAll]);  # training set  M: +, Red
+                testingSetM_texture_z.append(tempSmooth[indexAll]);  # training set  M: +, Red
+            else:
+                testingSetB_radius_x.append(tempRadius[indexAll]);  # training set  B: -, Red
+                testingSetB_smooth_y.append(tempTexture[indexAll]);  # training set  B: -, Red
+                testingSetB_texture_z.append(tempSmooth[indexAll]);  # training set  B: -, Red
+
+        else:
+            trainingDataSet.append({'id': tempID[indexAll], 'diagnosis': tempDiagnosis[indexAll], 'radius_mean': tempRadius[indexAll],
+                                    'texture_mean': tempTexture[indexAll], 'smoothness_mean': tempSmooth[indexAll]});
+
+            if tempDiagnosis[indexAll] == 'M':
+                trainingSetM_radius_x.append(tempRadius[indexAll]);  # training set  M: +, Blue
+                trainingSetM_smooth_y.append(tempSmooth[indexAll]);  # training set  M: +, Blue
+                trainingSetM_texture_z.append(tempTexture[indexAll]);  # training set  M: +, Blue
+            else:
+                trainingSetB_radius_x.append(tempRadius[indexAll]);  # training set  B: -, Blue
+                trainingSetB_smooth_y.append(tempSmooth[indexAll]);  # training set  B: -, Blue
+                trainingSetB_texture_z.append(tempTexture[indexAll]);  # training set  B: -, Blue
+
 
 
 
@@ -205,6 +228,7 @@ def displayTextResults():
 
 #Generates 3D-scatter plot
 def displayGraph():
+
     ax.scatter(trainingSetB_radius_x, trainingSetB_smooth_y, trainingSetB_texture_z, c='b', marker='_');
 
     ax.scatter(trainingSetM_radius_x, trainingSetM_smooth_y, trainingSetM_texture_z, c='b', marker='+');
@@ -217,10 +241,9 @@ def displayGraph():
     ax.set_ylabel('smoothness_mean')
     ax.set_zlabel('texture_mean')
 
-    ax.set_zlim(0, 25.0);
+    ax.set_zlim(0, 0.7);
 
-    plt.xlim(0, 22.0);
-    plt.ylim(0.09, 0.18);
+
 
     plt.show();
 
