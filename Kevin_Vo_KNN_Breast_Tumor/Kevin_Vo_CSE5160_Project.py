@@ -53,6 +53,14 @@ total_num_of_data = 0;
 def get_distance(distance):
     return distance.get('distance');
 
+
+def normalization(subDataSet):
+    min = subDataSet.min();
+    max = subDataSet.max();
+    sizeOfDataSet = len(subDataSet);
+    for i in range(0, sizeOfDataSet):
+        subDataSet = subDataSet([i] - min)/(max-min);
+
 #find the 3D distance where,
 # x1 -> radius means from testDataSet
 # x2 -> radius means from trainingDataSet
@@ -109,6 +117,8 @@ def populateLists():
                     trainingSetB_smooth_y.append(float(col[6]));  # training set  B: -, Blue
                     trainingSetB_texture_z.append(float(col[3]));  # training set  B: -, Blue
     csvfile.close();
+
+
 
 #Calls the findDistance function between a
 def getStoreDistance():
